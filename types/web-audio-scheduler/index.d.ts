@@ -2,28 +2,16 @@
 
 declare module 'web-audio-scheduler' {
 
-  interface SchedulerOptions {
-    context?: AudioContext | Object
-    interval?: number
-    aheadTime?: number
-    timerAPI?: Timer
-  }
-
-  interface Emitter {
-    on: (topic: string, cb: (data?: any) => void) => void
-    trigger: (topic: string, data?: any) => void
-  }
-
-  class WebAudioScheduler implements SchedulerOptions, Emitter {
+  class WebAudioScheduler implements Options, Emitter {
     context: AudioContext | Object
     interval: number
     aheadTime: number
     timerAPI: Timer
     _timerId: number
     _schedId: number
-    _scheds: Array<Object>
+    _scheds: Array<Event>
 
-    constructor (opts: SchedulerOptions)
+    constructor (opts: Options)
 
     state (): string
     currentTime (): number
@@ -41,16 +29,35 @@ declare module 'web-audio-scheduler' {
     trigger (topic: string, data?: any): void
   }
 
-  interface Event {
-    id: number
-    time: number
-    callback: Function
-    args: Array<any>
-  }
+  // interface Event {
+  //   id: number
+  //   time: number
+  //   callback: Function
+  //   args: Array<any>
+  // }
 
   interface Timer {
     setInterval (func: Function, wait: number): Object
     clearInterval (interval: number): void
+  }
+
+  interface Options {
+    context?: AudioContext | Object
+    interval?: number
+    aheadTime?: number
+    timerAPI?: Timer
+  }
+
+  interface Event {
+    id: number
+    time: number
+    callback: Function
+    args: Array<any> | Object
+  }
+
+  interface Emitter {
+    on: (topic: string, cb: (data?: any) => void) => void
+    trigger: (topic: string, data?: any) => void
   }
 
   export = WebAudioScheduler
