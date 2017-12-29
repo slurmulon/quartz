@@ -1,4 +1,4 @@
-import present from 'present'
+import now from 'performance-now'
 
 export interface Context {
 
@@ -9,7 +9,7 @@ export interface Context {
 export class DefaultContext {
 
   get currentTime () {
-    return present() / 1000
+    return now() / 1000
   }
 
 }

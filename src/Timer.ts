@@ -13,3 +13,8 @@ export interface StartInterval {
 export interface EndInterval {
   (interval: number): void
 }
+
+export interface Timer {
+  setInterval: StartInterval
+  clearInterval: EndInterval
+}
