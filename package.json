@@ -1,7 +1,7 @@
 {
   "name": "quartz",
   "version": "1.0.0",
-  "description": "Rock-solid timer for JavaScript",
+  "description": "Rock-solid intervals for JavaScript",
   "main": "src/index.js",
   "types": "src/types.d.ts",
   "scripts": {
