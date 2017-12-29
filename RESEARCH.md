@@ -39,3 +39,7 @@
 - Support groups of callbacks (that way not everything has to be defined in a massive callback with `if` or `switch` statements)
 - Support tempo updates
 - Either run `accurate-interval` or `Rolex` in the `web-worker-interval` and hope the adjustments work properly, OR run `request-interval` in the `web-worker-interval` and always lookup the latest step via the current timestamp, adjusted to the relative starting time
+
+## Searches
+
+- https://github.com/DefinitelyTyped/DefinitelyTyped/search?utf8=%E2%9C%93&q=setInterval&type=
