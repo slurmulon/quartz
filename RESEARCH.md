@@ -26,6 +26,7 @@
 - https://gist.github.com/mohayonao/6f7daddda053b975a705ce8437e434ce
 - http://www.javascriptkit.com/javatutors/requestanimationframe.shtml
 - https://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
+- https://sonoport.github.io/web-audio-clock.html
 
 ## Tech
 
