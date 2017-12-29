@@ -32,5 +32,8 @@
     "raf": "^3.4.0",
     "web-audio-scheduler": "^1.4.0",
     "worker-timers": "^4.0.20"
+  },
+  "devDependencies": {
+    "@types/node": "^8.5.2"
   }
 }

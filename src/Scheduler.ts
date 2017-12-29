@@ -15,7 +15,7 @@
 //  - ensure `worker-timers` uses `request-interval` behind the scenes instead of native
 //  - create abstract `Timer` API
 
-import WebAudioScheduler from 'web-audio-scheduler'
+// import WebAudioScheduler from 'web-audio-scheduler'
 
 export interface Scheduler {
   init: Function
