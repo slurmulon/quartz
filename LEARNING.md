@@ -14,6 +14,7 @@
 - https://www.typescriptlang.org/docs/handbook/module-resolution.html
 - https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html
 - https://medium.com/@Pelle_Jacobs/typescript-declaration-files-of-external-libraries-an-introduction-to-typings-b3d1fbaa07c7
+- http://ivanz.com/2016/06/07/how-does-typescript-discover-type-declarations-definitions-javascript
 
 ### Examples
 
