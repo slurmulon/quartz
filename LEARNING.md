@@ -5,6 +5,7 @@
 ### Guides
 
 - https://alligator.io/typescript/new-project/
+- https://www.npmjs.com/package/typings
 - https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html
 - https://github.com/scmx/example-typescript-library
 - https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html
@@ -24,3 +25,4 @@
 
 - "Invalid module name in augmentation": https://github.com/Microsoft/TypeScript/issues/9748
 - "declare modifier cannot be used in already ambient context": https://github.com/SitePen/dts-generator/issues/14
+- "How do I import a type definition module?": https://github.com/Microsoft/TypeScript/issues/9229 (**good general example on .d.ts definitions**)
