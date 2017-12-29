@@ -1,3 +1,5 @@
+// @see https://github.com/Microsoft/TypeScript/issues/9229#issuecomment-226882914
+
 declare module 'web-audio-scheduler' {
 
   interface SchedulerOptions {
@@ -7,7 +9,12 @@ declare module 'web-audio-scheduler' {
     timerAPI?: Timer
   }
 
-  class WebAudioScheduler implements SchedulerOptions {
+  interface Emitter {
+    on: (topic: string, cb: (data?: any) => void) => void
+    trigger: (topic: string, data?: any) => void
+  }
+
+  class WebAudioScheduler implements SchedulerOptions, Emitter {
     context: AudioContext | Object
     interval: number
     aheadTime: number
@@ -30,6 +37,8 @@ declare module 'web-audio-scheduler' {
     removeAll (): void
     process (t0: number, t1: number): void
 
+    on (topic: string, cb: Function): void
+    trigger (topic: string, data?: any): void
   }
 
   interface Event {
