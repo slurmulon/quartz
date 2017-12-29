@@ -1,0 +1,36 @@
+{
+  "name": "quartz",
+  "version": "1.0.0",
+  "description": "Rock-solid timer for JavaScript",
+  "main": "src/index.js",
+  "types": "src/types.d.ts",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slurmulon/quartz.git"
+  },
+  "keywords": [
+    "quartz",
+    "metronome",
+    "time",
+    "interval",
+    "accurate",
+    "high",
+    "resolution",
+    "drift"
+  ],
+  "author": "slurmulon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/slurmulon/quartz/issues"
+  },
+  "homepage": "https://github.com/slurmulon/quartz#readme",
+  "dependencies": {
+    "performance-now": "^2.1.0",
+    "raf": "^3.4.0",
+    "web-audio-scheduler": "^1.4.0",
+    "worker-timers": "^4.0.20"
+  }
+}
