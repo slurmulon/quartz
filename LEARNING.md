@@ -18,10 +18,12 @@
 - http://ivanz.com/2016/06/07/how-does-typescript-discover-type-declarations-definitions-javascript
 - http://evanshortiss.com/development/nodejs/typescript/2016/11/16/timers-in-typescript.html
 - https://egghead.io/lessons/typescript-create-high-quality-npm-packages-using-typescript
+- https://www.typescriptlang.org/docs/handbook/declaration-merging.html
 
 ### Examples
 
 - https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/adone/adone.d.ts
+- http://blogs.microsoft.co.il/gilf/2013/07/22/quick-tip-typescript-declare-keyword/
 
 ### Issues
 
@@ -31,3 +33,8 @@
 - "setInterval - Type 'Timer' is not assignable to type 'number'"
 - https://stackoverflow.com/questions/44416902/how-to-fix-types-node-index-d-ts-is-not-a-module
 - https://stackoverflow.com/questions/36013174/importing-node-and-express-with-typings-in-typescript
+- Missing `global`?:
+
+  ```
+  declare var global: global
+  ```
