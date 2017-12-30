@@ -1,6 +1,18 @@
 // @see https://github.com/Microsoft/TypeScript/issues/9229#issuecomment-226882914
 
+// import { setInterval, clearInterval } from 'node'
+// import * as node from '@types/node'
+// import 'node'
+
 declare module 'web-audio-scheduler' {
+
+  // import { setInterval, clearInterval } from '@types/node'
+  // import { setInterval, clearInterval } from 'node'
+
+  // import node = require('@types/node')
+  
+  import Node = NodeJS.Global
+  // import X = NodeJS.Global.setInterval
 
   class WebAudioScheduler implements Options, Emitter {
     context: AudioContext | Object
@@ -37,6 +49,11 @@ declare module 'web-audio-scheduler' {
   // }
 
   // FIXME: import these interfaces from Timer instead
+  // import node = require('node')
+
+  interface SetInterval {
+    (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
+  }
 
   interface ClearTimerInterval {
     (interval: NodeJS.Timer): void
@@ -49,10 +66,12 @@ declare module 'web-audio-scheduler' {
   type ClearInterval = ClearTimerInterval | ClearNumericInterval
 
   interface Timer {
-    setInterval (func: Function, wait: number): Object
-    // clearInterval (interval: NodeJS.Timer): void
-    // clearInterval (interval: number): void
+    setInterval: SetInterval
     clearInterval: ClearTimerInterval | ClearNumericInterval
+
+    // TODO
+    // setInterval: Node['setInterval']
+    // clearInterval: Node['clearInterval']
   }
 
   interface Options {

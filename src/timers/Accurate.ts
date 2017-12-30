@@ -1,14 +1,7 @@
-// import { StartInterval, EndInterval } from '../Timer'
-import { SetInterval, ClearInterval, EndTimerInterval } from '../Timer'
-// import Timer from './Default'
+import { SetInterval, ClearInterval } from '../Timer'
 import now from 'performance-now'
 
-// export const setInterval: StartInterval = (func: Function, wait: number): NodeJS.Timer | number => {
-
-// export const setInterval: StartInterval = (func, wait) => {
 export const setInterval: SetInterval = (func, wait) => {
-
-// export const setInterval: StartInterval = (func: Function, wait: number): number => {
   let action: Function
   let timeout: number
   let start: number = now()
@@ -28,12 +21,4 @@ export const setInterval: SetInterval = (func, wait) => {
   return timeout
 }
 
-// FIXME: cast NodeJS.Timer into number
-// export const clearInterval: EndInterval = (interval: NodeJS.Timer | number): void | number => void clearTimeout(interval as number)
-
-// export const clearInterval: EndInterval = (interval) => void global.clearTimeout(interval)
-export const clearInterval: EndTimerInterval = (interval) => void global.clearTimeout(interval)
-
-// export const clearInterval: EndInterval = (interval) => void clearTimeout(interval as number) // WORKS with default references
-//
-// export const clearInterval: EndInterval = (interval) => void Timer.clearTimeout(interval)
+export const clearInterval: ClearInterval = global.clearInterval
