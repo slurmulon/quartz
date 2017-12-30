@@ -1,4 +1,4 @@
-import { SetInterval, ClearInterval } from 'quartz'
+import { SetInterval, ClearInterval, Timer } from 'quartz'
 import now from 'performance-now'
 
 export const setInterval: SetInterval = (func, wait) => {
@@ -22,3 +22,7 @@ export const setInterval: SetInterval = (func, wait) => {
 }
 
 export const clearInterval: ClearInterval = global.clearInterval
+
+export const interval: Timer = { setInterval, clearInterval }
+
+export default interval

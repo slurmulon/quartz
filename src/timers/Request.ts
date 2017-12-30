@@ -1,4 +1,4 @@
-import { SetInterval, ClearNumericInterval } from 'quartz'
+import { SetInterval, ClearNumericInterval, Timer } from 'quartz'
 import now from 'performance-now'
 import raf from 'raf'
 
@@ -20,3 +20,7 @@ export const setInterval: SetInterval = (func, wait) => {
 }
 
 export const clearInterval: ClearNumericInterval = (interval) => void raf.cancel(interval)
+
+export const interval: Timer = { setInterval, clearInterval }
+
+export default interval

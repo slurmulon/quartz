@@ -1,9 +1,11 @@
 declare module 'quartz' {
 
   namespace Quartz {
-    
+
+    export type Callback = (...args: any[]) => void
+
     export interface SetInterval {
-      (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
+      (action: Callback, wait: number, ...args: any[]): NodeJS.Timer | number
     }
 
     export interface ClearNumericInterval {

@@ -1,17 +1,15 @@
 import WebAudioScheduler from 'web-audio-scheduler'
-// import { Timer } from './Timer'
-import { Timer } from 'quartz'
-import DefaultTimer from './timers/Default'
+import { Timer, Callback } from 'quartz'
 
-export class Quartz { //implements Scheduler {
-  action: Function
+export class Quartz {
+  action: Callback
   wait: number
   speed: number
   active: boolean
   context: AudioContext
   clock: WebAudioScheduler
 
-  constructor (action: Function, wait: number, speed: number, timer: Timer = DefaultTimer) {
+  constructor (action: Callback, wait: number, speed: number, timer: Timer = { setInterval, clearInterval }) {
     this.action  = action
     this.wait    = wait
     this.speed   = speed
@@ -40,13 +38,13 @@ export class Quartz { //implements Scheduler {
     this.speed = speed
   }
 
-  on (topic: string, action: Function): this {
+  on (topic: string, action: Callback): this {
     this.clock.on(topic, action)
 
     return this
   }
 
-  tick (event: any, after: Function = () => {}) { // FIXME: import WAS.Event interface, somehow. or use `any`
+  tick (event: any, after: Callback = () => {}) { // FIXME: import WAS.Event interface, somehow. or use `any`
     const t0 = event.playbackTime
     const t1 = t0 + event.args.duration
 

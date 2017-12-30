@@ -2,7 +2,6 @@
 
 declare module 'web-audio-scheduler' {
 
-  // import Node = NodeJS.Global
   import Node = NodeJS
   import Quartz = require('quartz')
 
@@ -21,10 +20,10 @@ declare module 'web-audio-scheduler' {
     currentTime (): number
     events (): Array<Event>
 
-    start (callback: Function, ...args: any[]): this
+    start (callback: Quartz.Callback, ...args: any[]): this
     stop (reset: boolean): WebAudioScheduler
-    insert (time: number, callback: Function, ...args: any[]): number
-    nextTick (time: number, callback: Function, ...args: any[]): number
+    insert (time: number, callback: Quartz.Callback, ...args: any[]): number
+    nextTick (time: number, callback: Quartz.Callback, ...args: any[]): number
     remove (schedId: number): number
     removeAll (): void
     process (t0: number, t1: number): void
@@ -32,13 +31,6 @@ declare module 'web-audio-scheduler' {
     on (topic: string, cb: Function): void
     trigger (topic: string, data?: any): void
   }
-
-  // interface Event {
-  //   id: number
-  //   time: number
-  //   callback: Function
-  //   args: Array<any>
-  // }
 
   interface Options {
     context?: AudioContext | Object
