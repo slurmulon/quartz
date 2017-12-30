@@ -8,6 +8,7 @@ declare module 'web-audio-scheduler' {
 
   // import Node = NodeJS.Global
   import Node = NodeJS
+  import Quartz = require('quartz-timer')
 
   class WebAudioScheduler implements Options, Emitter {
     context: AudioContext | Object
@@ -43,9 +44,10 @@ declare module 'web-audio-scheduler' {
   //   args: Array<any>
   // }
 
-  interface SetInterval {
-    (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
-  }
+  // FIXME: these need to be imported from Timer
+  // interface SetInterval {
+  //   (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
+  // }
 
   interface ClearTimerInterval {
     (interval: NodeJS.Timer): void
@@ -58,7 +60,7 @@ declare module 'web-audio-scheduler' {
   type ClearInterval = ClearTimerInterval | ClearNumericInterval
 
   interface Timer {
-    setInterval: SetInterval
+    setInterval: Quartz.SetInterval
     clearInterval: ClearTimerInterval | ClearNumericInterval
 
     // TODO
