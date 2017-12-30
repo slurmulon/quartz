@@ -1,9 +1,5 @@
 // @see https://github.com/Microsoft/TypeScript/issues/9229#issuecomment-226882914
 
-// import { setInterval, clearInterval } from 'node'
-// import * as node from '@types/node'
-// import 'node'
-
 declare module 'web-audio-scheduler' {
 
   // import Node = NodeJS.Global

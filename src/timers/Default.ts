@@ -1,4 +1,4 @@
-import { SetInterval, ClearInterval, Timer } from '../Timer'
+import { SetInterval, ClearInterval, Timer } from 'quartz'
 
 export const setInterval: SetInterval = global.setInterval
 

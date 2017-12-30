@@ -1,4 +1,4 @@
-import { SetInterval, ClearInterval } from '../Timer'
+import { SetInterval, ClearInterval } from 'quartz'
 import now from 'performance-now'
 
 export const setInterval: SetInterval = (func, wait) => {
