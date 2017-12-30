@@ -6,13 +6,8 @@
 
 declare module 'web-audio-scheduler' {
 
-  // import { setInterval, clearInterval } from '@types/node'
-  // import { setInterval, clearInterval } from 'node'
-
-  // import node = require('@types/node')
-  
-  import Node = NodeJS.Global
-  // import X = NodeJS.Global.setInterval
+  // import Node = NodeJS.Global
+  import Node = NodeJS
 
   class WebAudioScheduler implements Options, Emitter {
     context: AudioContext | Object
@@ -47,9 +42,6 @@ declare module 'web-audio-scheduler' {
   //   callback: Function
   //   args: Array<any>
   // }
-
-  // FIXME: import these interfaces from Timer instead
-  // import node = require('node')
 
   interface SetInterval {
     (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
@@ -92,6 +84,8 @@ declare module 'web-audio-scheduler' {
     on: (topic: string, cb: (data?: any) => void) => void
     trigger: (topic: string, data?: any) => void
   }
+
+  // type Emitter = NodeJS.EventEmitter
 
   export = WebAudioScheduler
 

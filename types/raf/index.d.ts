@@ -1,5 +1,6 @@
 declare module 'raf' {
-  function raf (func: Function): number
+  // function raf (func: Function): number
+  function raf (func: Function): NodeJS.Timer
 
   namespace raf {
     function cancel (...args: any[]): void

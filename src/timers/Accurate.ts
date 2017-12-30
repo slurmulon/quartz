@@ -2,8 +2,8 @@ import { SetInterval, ClearInterval } from '../Timer'
 import now from 'performance-now'
 
 export const setInterval: SetInterval = (func, wait) => {
-  let action: Function
-  let timeout: number
+  let action: (...args: any[]) => void
+  let timeout: NodeJS.Timer //number
   let start: number = now()
   let next: number = start
 
@@ -11,12 +11,12 @@ export const setInterval: SetInterval = (func, wait) => {
     const scheduled: number = next
 
     next += wait
-    timeout = window.setTimeout(action, next - now())
+    timeout = global.setTimeout(action, next - now())
 
     func(scheduled)
   }
 
-  timeout = window.setTimeout(action, next - now())
+  timeout = global.setTimeout(action, next - now())
 
   return timeout
 }
