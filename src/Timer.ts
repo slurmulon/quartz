@@ -26,12 +26,15 @@ export interface EndInterval {
   // (interval: number): void // enabling both this line adn the above is very interesting (but breaks Default)
 
   // (interval: NodeJS.Timer | number): void
-  
+}
+
+export interface NativeEndInterval {
+  (interval: NodeJS.Timer): void
 }
 
 export interface Timer {
   setInterval: StartInterval
-  clearInterval: EndInterval // TOOD (somehow): | global.clearInterval
+  clearInterval: EndInterval | NativeEndInterval // TOOD (somehow): | global.clearInterval
   setTimeout?: Function
   clearTimeout?: Function
 }

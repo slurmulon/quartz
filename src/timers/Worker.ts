@@ -9,5 +9,7 @@ export const setInterval: StartInterval = (func, wait) => {
 // export const clearInterval: EndInterval = (interval: StartInterval) => {
 
 export const clearInterval: EndInterval = (interval) => {
+  if (typeof interval !== 'number') return
+
   return workerTimers.clearInterval(interval)
 }
