@@ -1,6 +1,6 @@
-declare module 'quartz-timer' {
+declare module 'quartz' {
 
-  namespace QuartzTimer {
+  namespace Quartz {
     
     export interface SetInterval {
       (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
@@ -25,6 +25,6 @@ declare module 'quartz-timer' {
 
   }
 
-  export = QuartzTimer
+  export = Quartz
 
 }

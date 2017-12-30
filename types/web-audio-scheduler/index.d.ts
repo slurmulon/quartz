@@ -8,7 +8,7 @@ declare module 'web-audio-scheduler' {
 
   // import Node = NodeJS.Global
   import Node = NodeJS
-  import Quartz = require('quartz-timer')
+  import Quartz = require('quartz')
 
   class WebAudioScheduler implements Options, Emitter {
     context: AudioContext | Object

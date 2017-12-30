@@ -1,4 +1,4 @@
-import Quartz = require('quartz-timer')
+import Quartz = require('quartz')
 
 // export interface SetInterval {
 //   (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
