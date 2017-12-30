@@ -1,5 +1,6 @@
 import WebAudioScheduler from 'web-audio-scheduler'
-import { Timer } from './Timer'
+// import { Timer } from './Timer'
+import { Timer } from 'quartz'
 import DefaultTimer from './timers/Default'
 
 export class Quartz { //implements Scheduler {

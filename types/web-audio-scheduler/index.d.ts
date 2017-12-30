@@ -14,7 +14,7 @@ declare module 'web-audio-scheduler' {
     context: AudioContext | Object
     interval: number
     aheadTime: number
-    timerAPI: Timer
+    timerAPI: Quartz.Timer
     _timerId: number
     _schedId: number
     _scheds: Array<Event>
@@ -44,35 +44,11 @@ declare module 'web-audio-scheduler' {
   //   args: Array<any>
   // }
 
-  // FIXME: these need to be imported from Timer
-  // interface SetInterval {
-  //   (func: (...args: any[]) => void, wait: number, ...args: any[]): NodeJS.Timer | number
-  // }
-
-  interface ClearTimerInterval {
-    (interval: NodeJS.Timer): void
-  }
-
-  interface ClearNumericInterval {
-    (interval: number): void
-  }
-
-  type ClearInterval = ClearTimerInterval | ClearNumericInterval
-
-  interface Timer {
-    setInterval: Quartz.SetInterval
-    clearInterval: ClearTimerInterval | ClearNumericInterval
-
-    // TODO
-    // setInterval: Node['setInterval']
-    // clearInterval: Node['clearInterval']
-  }
-
   interface Options {
     context?: AudioContext | Object
     interval?: number
     aheadTime?: number
-    timerAPI?: Timer
+    timerAPI?: Quartz.Timer
   }
 
   interface Event {
