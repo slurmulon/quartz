@@ -4,7 +4,6 @@ import raf from 'raf'
 
 export const setInterval: SetInterval = (func, wait) => {
   let start: number = now()
-  // let interval: number = raf(loop)
   let interval: NodeJS.Timer = raf(loop)
 
   function loop () {
