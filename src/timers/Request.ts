@@ -1,8 +1,9 @@
-import { StartInterval, EndInterval } from '../Timer'
+// import { StartInterval, EndInterval } from '../Timer'
+import { SetInterval, ClearInterval, EndNumericInterval } from '../Timer'
 import now from 'performance-now'
 import raf from 'raf'
 
-export const setInterval: StartInterval = (func: Function, wait: number) => {
+export const setInterval: SetInterval = (func: Function, wait: number) => {
   let start: number = now()
   let interval: number = raf(loop)
 
@@ -19,6 +20,6 @@ export const setInterval: StartInterval = (func: Function, wait: number) => {
   return interval
 }
 
-export const clearInterval = (interval: StartInterval) => {
+export const clearInterval: EndNumericInterval = (interval) => {
   raf.cancel(interval)
 }

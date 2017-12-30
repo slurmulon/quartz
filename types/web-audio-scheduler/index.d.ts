@@ -36,9 +36,23 @@ declare module 'web-audio-scheduler' {
   //   args: Array<any>
   // }
 
+  // FIXME: import these interfaces from Timer instead
+
+  interface ClearTimerInterval {
+    (interval: NodeJS.Timer): void
+  }
+
+  interface ClearNumericInterval {
+    (interval: number): void
+  }
+
+  type ClearInterval = ClearTimerInterval | ClearNumericInterval
+
   interface Timer {
     setInterval (func: Function, wait: number): Object
-    clearInterval (interval: number): void
+    // clearInterval (interval: NodeJS.Timer): void
+    // clearInterval (interval: number): void
+    clearInterval: ClearTimerInterval | ClearNumericInterval
   }
 
   interface Options {
