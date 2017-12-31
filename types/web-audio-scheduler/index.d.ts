@@ -21,7 +21,7 @@ declare module 'web-audio-scheduler' {
     events (): Array<Event>
 
     start (callback: Quartz.Callback, ...args: any[]): this
-    stop (reset: boolean): WebAudioScheduler
+    stop (reset?: boolean): WebAudioScheduler
     insert (time: number, callback: Quartz.Callback, ...args: any[]): number
     nextTick (time: number, callback: Quartz.Callback, ...args: any[]): number
     remove (schedId: number): number
@@ -29,6 +29,7 @@ declare module 'web-audio-scheduler' {
     process (t0: number, t1: number): void
 
     on (topic: string, cb: Function): void
+    emit (event: string | symbol, ...args: any[]): boolean
     trigger (topic: string, data?: any): void
   }
 
@@ -48,6 +49,7 @@ declare module 'web-audio-scheduler' {
 
   interface Emitter {
     on: (topic: string, cb: (data?: any) => void) => void
+    emit: (event: string | symbol, ...args: any[]) => void
     trigger: (topic: string, data?: any) => void
   }
 
