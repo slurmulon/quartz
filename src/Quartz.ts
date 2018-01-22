@@ -98,9 +98,6 @@ export class Quartz {
     node.buffer = buffer
     node.start(0)
 
-    // this.worker = new Worker('Worker.js')
-    // this.worker.postMessage({ wait: this.wait })
-
     this.worker = WorkerTimer()
     this.worker.postMessage({ wait: this.wait })
 
@@ -119,13 +116,13 @@ export class Quartz {
   play () {
     this.state.running = true
     this.sched.start(this.loop)
-    // this.worker.postMessage('start')
+    this.worker.postMessage('start')
   }
 
   stop (reset?: boolean) {
     this.state.running = false
     this.sched.stop(reset)
-    // this.worker.postMessage('stop')
+    this.worker.postMessage('stop')
   }
 
   on (topic: string, action: Callback): this {
