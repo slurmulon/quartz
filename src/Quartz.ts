@@ -40,26 +40,36 @@ export class Quartz {
   unit: number // TODO: move to `metronome`
   interval: number // in seconds
   silent: boolean
-  // active: boolean
   state: State
   context: AudioContext
   sched: WebAudioScheduler
   worker: InlineWorker //Worker
 
-  constructor (
+  constructor ({
+    action,
+    wait,
+    ahead,
+    speed,
+    interval,
+    unit = 1,
+    tempo = 120.0,
+    silent = false,
+    timer = { setInterval, clearInterval }
+  } : {
     action: Callback,
     wait: number,
     ahead: number,
     speed: number,
     interval: number,
-    unit: number = 1,
-    silent: boolean = false,
-    timer: Timer = { setInterval, clearInterval }
-  ) {
+    unit: number,
+    tempo: number,
+    silent: boolean,
+    timer: Timer
+  }) {
     this.action = action
     this.wait = wait
     this.ahead = ahead
-    this.speed = speed
+    this.speed = speed // TODO: confirm the need for this
     this.interval = interval
     this.unit = unit
     this.silent = silent
@@ -75,9 +85,9 @@ export class Quartz {
 
     this.state = {
       running: false,
-      duration: 0.0,
+      duration: 60 / tempo,
       increment: 0,
-      bpm: 120.0,
+      bpm: tempo,
       last: {
         to: 0,
         end: 0
@@ -170,6 +180,7 @@ export class Quartz {
 
   // }
 
+  // TODO: change to setter
   setTempo (tempo: number): this {
     const bps: number = tempo / 60
     const spb: number = 60 / tempo
@@ -185,6 +196,7 @@ export class Quartz {
   }
 
   // FIXME: actually set `this.speed`
+  // TODO: change to setter
   setSpeed (multiplier: number): this {
     const factor: number = multiplier || 1
     const tempo: number  = this.state.bpm * factor
