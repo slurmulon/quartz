@@ -1,10 +1,13 @@
-import { IntervalId } from 'quartz'
+import { Timer, IntervalId } from 'quartz'
 import InlineWorker from 'inline-worker'
 
 let interval: IntervalId | null
 let wait: number = 100
 
 const timer = (): IntervalId => setInterval(() => postMessage('tick', ''), wait)
+
+// TODO: inherit custom interval from parent quartz object or just use `accurate-timer`
+// const worker = (api: Timer = Clock) => new InlineWorker(self => {
 
 const worker = () => new InlineWorker(self => {
   self.onmessage = event => {
