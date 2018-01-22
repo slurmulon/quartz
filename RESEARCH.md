@@ -2,14 +2,16 @@
 
 ## Approach
 
+- https://www.html5rocks.com/en/tutorials/audio/scheduling/
+  * https://github.com/cwilso/metronome/blob/master/js/metronome.js
 - http://catarak.github.io/blog/2014/12/02/web-audio-timing-tutorial/
 - http://blog.wemakeawesomesh.it/synced-web-audio-playback/
-- https://www.html5rocks.com/en/tutorials/audio/scheduling/
 - https://www.npmjs.com/package/worker-timers
 - https://developers.google.com/web/fundamentals/performance/rendering/optimize-javascript-execution
 - https://w3c.github.io/hr-time/
 - https://www.sitepoint.com/syncing-css-animations-with-html5-audio/
 - http://timpietrusky.com/dotjs2013/
+- https://github.com/sebpiq/WAAClock/blob/master/lib/WAAClock.js
 
 ## Performance
 
@@ -30,9 +32,13 @@
 
 ## Tech
 
+- https://github.com/mohayonao/web-audio-scheduler
+- https://github.com/mmckegg/bopper/blob/master/index.js
 - https://github.com/adamrenklint/dilla (`bopper` + `ditty`)
 - https://github.com/cwilso/metronome/ (**good place to start**)
 - https://www.npmjs.com/package/raf-schd
+- https://github.com/chrisguttandin/audio-context-timers
+- https://github.com/chrisguttandin/audio-context-timers/blob/master/src/module.ts
 
 ## Features
 

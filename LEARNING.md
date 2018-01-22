@@ -19,11 +19,14 @@
 - http://evanshortiss.com/development/nodejs/typescript/2016/11/16/timers-in-typescript.html
 - https://egghead.io/lessons/typescript-create-high-quality-npm-packages-using-typescript
 - https://www.typescriptlang.org/docs/handbook/declaration-merging.html
+- https://blog.mariusschulz.com/2015/11/13/typing-destructured-object-parameters-in-typescript
+- http://ivanz.com/2016/06/07/how-does-typescript-discover-type-declarations-definitions-javascript
 
 ### Examples
 
 - https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/adone/adone.d.ts
 - http://blogs.microsoft.co.il/gilf/2013/07/22/quick-tip-typescript-declare-keyword/
+- https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html
 
 ### Issues
 
