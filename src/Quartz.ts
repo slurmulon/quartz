@@ -2,12 +2,14 @@
 // @see https://github.com/cwilso/metronome/blob/master/js/metronome.js
 
 import WebAudioScheduler from 'web-audio-scheduler'
+import InlineWorker from 'inline-worker'
+import WorkerTimer from './Worker'
 import { Timer, Callback } from 'quartz'
 
 export type Time = Date | number
 
 export interface State {
-  playing: boolean
+  running: boolean
   duration: number
   increment: number
   bpm: number
@@ -32,15 +34,17 @@ export interface State {
 
 export class Quartz {
   action: Callback
-  wait: number
+  wait: number // how frequently to call scheduling function (in milliseconds)
   ahead: number
   speed: number
   unit: number // TODO: move to `metronome`
-  interval: number
+  interval: number // in seconds
+  silent: boolean
   // active: boolean
   state: State
   context: AudioContext
   sched: WebAudioScheduler
+  worker: InlineWorker //Worker
 
   constructor (
     action: Callback,
@@ -49,6 +53,7 @@ export class Quartz {
     speed: number,
     interval: number,
     unit: number = 1,
+    silent: boolean = false,
     timer: Timer = { setInterval, clearInterval }
   ) {
     this.action = action
@@ -57,6 +62,7 @@ export class Quartz {
     this.speed = speed
     this.interval = interval
     this.unit = unit
+    this.silent = silent
 
     this.context = new AudioContext()
 
@@ -68,7 +74,7 @@ export class Quartz {
     })
 
     this.state = {
-      playing: false,
+      running: false,
       duration: 0.0,
       increment: 0,
       bpm: 120.0,
@@ -83,37 +89,44 @@ export class Quartz {
     }
   }
 
-  init () {
+  // play silent buffer to unlock the audio
+  // kick off the web worker timer
+  init (): this {
+    const buffer = this.context.createBuffer(1, 1, 22050)
+    const node   = this.context.createBufferSource()
 
+    node.buffer = buffer
+    node.start(0)
+
+    // this.worker = new Worker('Worker.js')
+    // this.worker.postMessage({ wait: this.wait })
+
+    this.worker = WorkerTimer()
+    this.worker.postMessage({ wait: this.wait })
+
+    return this
   }
 
+  // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
+  // TODO: call `this.tick`
   loop (event: Event) {
-    const spb = 60.0 / this.speed
-
-    // this.state.nextNoteTime = this.unit * secondsPerBeat
-    // this.state.currentNoteIndex++
+    const spb = 60 / this.speed
 
     this.state.step.next = this.unit * spb
     this.state.step.cursor++
   }
 
   play () {
-    this.state.playing = true
+    this.state.running = true
     this.sched.start(this.loop)
     // this.worker.postMessage('start')
   }
 
   stop (reset?: boolean) {
-    this.state.playing = false
+    this.state.running = false
     this.sched.stop(reset)
     // this.worker.postMessage('stop')
   }
-
-  // tempo (speed: number) {
-  //   // const bps = tempo / number
-
-  //   this.speed = speed
-  // }
 
   on (topic: string, action: Callback): this {
     this.sched.on(topic, action)
@@ -121,11 +134,27 @@ export class Quartz {
     return this
   }
 
-  tick (event: any, after: Callback = () => {}): void { // FIXME: import WAS.Event interface, somehow. or use `any`
-    const t0: number = event.playbackTime || 0
-    const t1: number = t0 + event.args.duration
+  // FIXME: import WAS.Event interface, somehow. or use `any`
+  // TODO: consider `cycleLength` and `preCycle`
+  //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
+  // tick (event: any, after: Callback = () => {}): void {
+  //   const t0: number = event.playbackTime || 0
+  //   const t1: number = t0 + event.args.duration
 
-    this.sched.nextTick(t1, after)
+  //   this.sched.nextTick(t1, after)
+  // }
+
+  // @see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
+  schedule (): void {
+    const { next } = this.state.step
+    const current  = this.state.last.end as number
+    const frame    = this.context.currentTime + this.ahead
+
+    while (next < frame) {
+      // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
+      // this.sched.insert(current, next)
+      this.sched.insert(current, this.schedule)
+    }
   }
 
   getPositionAt (time: number): number {
@@ -140,11 +169,7 @@ export class Quartz {
     return this.context.currentTime - (offset * this.state.duration)
   }
 
-  // getCurrentPosition (): number {
-  //   return this.getPositionAt(this.context.currentTime)
-  // }
-
-  // getBeatDuration (): number {
+  // getStepDuration (): number {
 
   // }
 
@@ -162,18 +187,12 @@ export class Quartz {
     return this
   }
 
+  // FIXME: actually set `this.speed`
   setSpeed (multiplier: number): this {
-    const factor: number = multiplier || 1 //Number.parseFloat(multiplier) || 0
+    const factor: number = multiplier || 1
     const tempo: number  = this.state.bpm * factor
-    const bps: number = tempo / 60
-    const spb: number = 60 / tempo
 
-    this.state.duration  = spb
-    this.state.increment = bps * this.rate
-
-    this.sched.emit('speed', spb)
-
-    return this
+    return this.setTempo(tempo)
   }
 
   get position (): number {
