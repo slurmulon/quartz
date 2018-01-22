@@ -29,6 +29,7 @@
   "homepage": "https://github.com/slurmulon/quartz#readme",
   "dependencies": {
     "audio-context-timers": "^2.1.12",
+    "inline-worker": "^1.1.0",
     "performance-now": "^2.1.0",
     "raf": "^3.4.0",
     "web-audio-scheduler": "^1.4.0",
