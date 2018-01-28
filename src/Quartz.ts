@@ -39,7 +39,7 @@ export interface State {
 
 export class Quartz {
   action: Callback
-  wait: number // how frequently to call scheduling function (in milliseconds)
+  wait: number // how frequently to call scheduling function (in milliseconds). maybe rename to `freq` or `frequency`
   ahead: number
   speed: number // TODO: make this redundant, replace with just `tempo`
   unit: number // TODO: move to `metronome`
@@ -132,6 +132,40 @@ export class Quartz {
     // TODO: call `this.tick`!
   }
 
+  // TODO: figure out wtf this is about lol
+  //  - https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md
+  //  - `function ticktac(e) {`
+  //  - This function determines how long to play a now for. this is typically where the oscillator's audio is generated and played.
+  // FIXME: import WAS.Event interface, somehow. or use `any`
+  // TODO: consider `cycleLength` and `preCycle`
+  //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
+  tick (event: any, after: Callback = () => {}): void {
+    const t0: number = event.playbackTime || 0
+    const t1: number = t0 + event.args.duration
+
+    this.action(event)
+
+    // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
+    this.scheduler.nextTick(t1, after)
+  }
+
+  // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
+  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L89 (calls `.insert` recursively)
+  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L118 (calls `.process`
+  // FIXME: may need to call `this.scheduler.nextTick` here... (@see usage in https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
+  // FIXME: I think this can just be completely replaced with `scheduler.nextTick`!
+  schedule (): void {
+    const { next } = this.state.step
+    const current  = this.state.last.end as number
+    const frame    = this.context.currentTime + this.ahead
+
+    while (next < frame) {
+      // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
+      // this.scheduler.insert(current, next)
+      this.scheduler.insert(current, this.schedule)
+    }
+  }
+
   play () {
     this.state.running = true
     this.scheduler.start(this.loop)
@@ -148,37 +182,6 @@ export class Quartz {
     this.scheduler.on(topic, action)
 
     return this
-  }
-
-  // TODO: figure out wtf this is about lol
-  //  - https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md
-  //  - `function ticktac(e) {`
-  //  - This function determines how long to play a now for. this is typically where the oscillator's audio is generated and played.
-  // FIXME: import WAS.Event interface, somehow. or use `any`
-  // TODO: consider `cycleLength` and `preCycle`
-  //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
-  tick (event: any, after: Callback = () => {}): void {
-    const t0: number = event.playbackTime || 0
-    const t1: number = t0 + event.args.duration
-
-    // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
-    this.scheduler.nextTick(t1, after)
-  }
-
-  // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
-  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L89 (calls `.insert` recursively)
-  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L118 (calls `.process`
-  // FIXME: may need to call `this.scheduler.nextTick` here... (@see usage in https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
-  schedule (): void {
-    const { next } = this.state.step
-    const current  = this.state.last.end as number
-    const frame    = this.context.currentTime + this.ahead
-
-    while (next < frame) {
-      // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
-      // this.scheduler.insert(current, next)
-      this.scheduler.insert(current, this.schedule)
-    }
   }
 
   getPositionAt (time: number): number {
