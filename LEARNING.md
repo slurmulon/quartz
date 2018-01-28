@@ -41,3 +41,4 @@
   ```
   declare var global: global
   ```
+- https://github.com/Microsoft/TypeScript/issues/7294
