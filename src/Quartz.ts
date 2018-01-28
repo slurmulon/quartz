@@ -17,13 +17,14 @@ export interface State {
   running: boolean
   duration: number
   increment: number
-  bpm: number
+  // bpm: number // TODO: rename to `tempo`. removes need for multiple variables
+  tempo: number // FIXME: Quartz.tempo also exists
   last: {
     to: number
     end: Time
   }
   step: {
-    next: Time
+    next: number //Time
     cursor: number
   }
 }
@@ -41,7 +42,7 @@ export class Quartz {
   action: Callback
   wait: number // how frequently to call scheduling function (in milliseconds)
   ahead: number
-  speed: number
+  speed: number // TODO: make this redundant, replace with just `tempo`
   unit: number // TODO: move to `metronome`
   // interval: number // in seconds (NOT NEEDED)
   repeat: boolean
@@ -92,7 +93,7 @@ export class Quartz {
       running: false,
       duration: 60 / tempo,
       increment: (tempo / 60) * this.rate,
-      bpm: tempo,
+      tempo,
       last: {
         to: 0,
         end: 0
@@ -121,7 +122,8 @@ export class Quartz {
 
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
-    const spb = 60 / this.speed
+    // const spb = 60 / this.speed (??? why speed)
+    const spb = 60 / this.state.tempo
 
     this.state.step.next = this.unit * spb
     this.state.step.cursor++
@@ -154,12 +156,13 @@ export class Quartz {
   // FIXME: import WAS.Event interface, somehow. or use `any`
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
-  // tick (event: any, after: Callback = () => {}): void {
-  //   const t0: number = event.playbackTime || 0
-  //   const t1: number = t0 + event.args.duration
+  tick (event: any, after: Callback = () => {}): void {
+    const t0: number = event.playbackTime || 0
+    const t1: number = t0 + event.args.duration
 
-  //   this.scheduler.nextTick(t1, after)
-  // }
+    // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
+    this.scheduler.nextTick(t1, after)
+  }
 
   // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
   // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L89 (calls `.insert` recursively)
@@ -197,18 +200,19 @@ export class Quartz {
 
     this.state.duration = spb
     this.state.increment = bps * rate
-    this.state.bpm = tempo
+    // this.state.bpm = tempo
+    this.state.tempo = tempo
 
     this.scheduler.emit('tempo', tempo)
 
     return this
   }
 
-  // FIXME: actually set `this.speed`
+  // FIXME: actually set `this.speed` (maybe, `speed` is probably redundant
   // TODO: change to setter
   setSpeed (multiplier: number): this {
-    const factor: number = multiplier || 1
-    const tempo: number  = this.state.bpm * factor
+    const scale: number = multiplier || 1
+    const tempo: number = this.state.tempo * scale
 
     return this.setTempo(tempo)
   }
