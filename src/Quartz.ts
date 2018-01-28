@@ -17,7 +17,6 @@ export interface State {
   running: boolean
   duration: number
   increment: number
-  // bpm: number // TODO: rename to `tempo`. removes need for multiple variables
   tempo: number // FIXME: Quartz.tempo also exists
   last: {
     to: number
@@ -120,6 +119,7 @@ export class Quartz {
     return this
   }
 
+  // LINK: `metronome` in `web-audio-scheduler` (https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
     // const spb = 60 / this.speed (??? why speed)
@@ -128,6 +128,7 @@ export class Quartz {
     this.state.step.next = this.unit * spb
     this.state.step.cursor++
 
+    // TODO: potentially call `schedule`. should be the same as tick, most likely. (@see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L158)
     // TODO: call `this.tick`!
   }
 
@@ -200,7 +201,6 @@ export class Quartz {
 
     this.state.duration = spb
     this.state.increment = bps * rate
-    // this.state.bpm = tempo
     this.state.tempo = tempo
 
     this.scheduler.emit('tempo', tempo)
