@@ -1,5 +1,8 @@
-// @see https://github.com/mmckegg/bopper/blob/master/index.js
 // @see https://github.com/cwilso/metronome/blob/master/js/metronome.js
+// @see https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js
+// @see https://github.com/sebpiq/WAAClock/blob/master/lib/WAAClock.js
+
+// "In general, to be resilient to slower machines and operating systems, it’s best to have a large overall lookahead and a reasonably short interval"
 
 import WebAudioScheduler from 'web-audio-scheduler'
 import InlineWorker from 'inline-worker'
@@ -8,6 +11,8 @@ import { Timer, Callback } from 'quartz'
 
 export type Time = Date | number
 
+// TODO: consider `preCycle`..?
+// @see: https://github.com/mmckegg/bopper/blob/master/index.js#L35
 export interface State {
   running: boolean
   duration: number
@@ -38,11 +43,12 @@ export class Quartz {
   ahead: number
   speed: number
   unit: number // TODO: move to `metronome`
-  interval: number // in seconds
+  // interval: number // in seconds (NOT NEEDED)
+  repeat: boolean
   silent: boolean
   state: State
   context: AudioContext
-  sched: WebAudioScheduler
+  scheduler: WebAudioScheduler
   worker: InlineWorker //Worker
 
   constructor ({
@@ -50,7 +56,6 @@ export class Quartz {
     wait,
     ahead,
     speed,
-    interval,
     unit = 1,
     tempo = 120.0,
     silent = false,
@@ -60,9 +65,10 @@ export class Quartz {
     wait: number,
     ahead: number,
     speed: number,
-    interval: number,
+    // interval: number,
     unit: number,
     tempo: number,
+    repeat: boolean,
     silent: boolean,
     timer: Timer
   }) {
@@ -70,23 +76,22 @@ export class Quartz {
     this.wait = wait
     this.ahead = ahead
     this.speed = speed // TODO: confirm the need for this
-    this.interval = interval
-    this.unit = unit
+    this.unit = unit // TODO: confirm the need for this / where it came from...
     this.silent = silent
 
     this.context = new AudioContext()
 
-    this.sched = new WebAudioScheduler({
+    this.scheduler = new WebAudioScheduler({
       context: this.context,
+      interval: this.rate, // NOTE: this is the same as `rate` AKA `cycleLength`. need to conflate.
       timerAPI: timer,
-      aheadTime: ahead,
-      interval
+      aheadTime: ahead
     })
 
     this.state = {
       running: false,
       duration: 60 / tempo,
-      increment: 0,
+      increment: (tempo / 60) * this.rate,
       bpm: tempo,
       last: {
         to: 0,
@@ -102,7 +107,7 @@ export class Quartz {
   // play silent buffer to unlock the audio
   // kick off the web worker timer
   init (): this {
-    const buffer = this.context.createBuffer(1, 1, 22050)
+    const buffer = this.context.createBuffer(1, 1, 22050 /* minimum sample rate */)
     const node   = this.context.createBufferSource()
 
     node.buffer = buffer
@@ -115,32 +120,37 @@ export class Quartz {
   }
 
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
-  // TODO: call `this.tick`
   loop (event: Event) {
     const spb = 60 / this.speed
 
     this.state.step.next = this.unit * spb
     this.state.step.cursor++
+
+    // TODO: call `this.tick`!
   }
 
   play () {
     this.state.running = true
-    this.sched.start(this.loop)
+    this.scheduler.start(this.loop)
     this.worker.postMessage('start')
   }
 
   stop (reset?: boolean) {
     this.state.running = false
-    this.sched.stop(reset)
+    this.scheduler.stop(reset)
     this.worker.postMessage('stop')
   }
 
   on (topic: string, action: Callback): this {
-    this.sched.on(topic, action)
+    this.scheduler.on(topic, action)
 
     return this
   }
 
+  // TODO: figure out wtf this is about lol
+  //  - https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md
+  //  - `function ticktac(e) {`
+  //  - This function determines how long to play a now for. this is typically where the oscillator's audio is generated and played.
   // FIXME: import WAS.Event interface, somehow. or use `any`
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
@@ -148,10 +158,13 @@ export class Quartz {
   //   const t0: number = event.playbackTime || 0
   //   const t1: number = t0 + event.args.duration
 
-  //   this.sched.nextTick(t1, after)
+  //   this.scheduler.nextTick(t1, after)
   // }
 
-  // @see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
+  // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
+  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L89 (calls `.insert` recursively)
+  // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L118 (calls `.process`
+  // FIXME: may need to call `this.scheduler.nextTick` here... (@see usage in https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   schedule (): void {
     const { next } = this.state.step
     const current  = this.state.last.end as number
@@ -159,13 +172,13 @@ export class Quartz {
 
     while (next < frame) {
       // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
-      // this.sched.insert(current, next)
-      this.sched.insert(current, this.schedule)
+      // this.scheduler.insert(current, next)
+      this.scheduler.insert(current, this.schedule)
     }
   }
 
   getPositionAt (time: number): number {
-    const delta: number = (this.state.last.end as number) - time
+    const delta = (this.state.last.end as number) - time
 
     return this.state.last.to - (delta / this.state.duration)
   }
@@ -175,10 +188,6 @@ export class Quartz {
 
     return this.context.currentTime - (offset * this.state.duration)
   }
-
-  // getStepDuration (): number {
-
-  // }
 
   // TODO: change to setter
   setTempo (tempo: number): this {
@@ -190,7 +199,7 @@ export class Quartz {
     this.state.increment = bps * rate
     this.state.bpm = tempo
 
-    this.sched.emit('tempo', tempo)
+    this.scheduler.emit('tempo', tempo)
 
     return this
   }
@@ -208,7 +217,7 @@ export class Quartz {
     return this.getPositionAt(this.context.currentTime)
   }
 
-  get rate (): number {
+  get rate (): number { // AKA `cycleLength`
     return (1 / this.context.sampleRate) * 1024
   }
 
