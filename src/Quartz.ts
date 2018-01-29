@@ -24,7 +24,7 @@ export interface State {
   }
   step: {
     next: number //Time
-    cursor: number
+    cursor: number // FIXME: actually integrate this beyond just incrementing...
   }
 }
 
@@ -143,10 +143,11 @@ export class Quartz {
     const t0: number = event.playbackTime || 0
     const t1: number = t0 + event.args.duration
 
-    this.action(event)
+    this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
 
     // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
-    this.scheduler.nextTick(t1, after)
+    // TODO: determine a clean way for the user to provide an `after each tick` callback (either accept in `play` or on `this`. probably `this`.)
+    // this.scheduler.nextTick(t1, after)
   }
 
   // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
@@ -161,7 +162,6 @@ export class Quartz {
 
     while (next < frame) {
       // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
-      // this.scheduler.insert(current, next)
       this.scheduler.insert(current, this.schedule)
     }
   }
