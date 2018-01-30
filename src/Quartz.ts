@@ -1,5 +1,6 @@
 // @see https://github.com/cwilso/metronome/blob/master/js/metronome.js
 // @see https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js
+// @see https://github.com/mmckegg/bopper/blob/master/index.js
 // @see https://github.com/sebpiq/WAAClock/blob/master/lib/WAAClock.js
 
 // "In general, to be resilient to slower machines and operating systems, it’s best to have a large overall lookahead and a reasonably short interval"
@@ -14,10 +15,10 @@ export type Time = Date | number
 // TODO: consider `preCycle`..?
 // @see: https://github.com/mmckegg/bopper/blob/master/index.js#L35
 export interface State {
-  running: boolean
-  duration: number
-  increment: number
-  tempo: number // FIXME: Quartz.tempo also exists
+  running: boolean // whether or not the timer is running
+  duration: number // how long to play each beat
+  increment: number // FIXME: this seems entirely redundant
+  tempo: number
   last: {
     to: number
     end: Time
@@ -40,8 +41,8 @@ export interface State {
 export class Quartz {
   action: Callback
   wait: number // how frequently to call scheduling function (in milliseconds). maybe rename to `freq` or `frequency`
-  ahead: number
-  speed: number // TODO: make this redundant, replace with just `tempo`
+  ahead: number // how far ahead to schedule audio (in seconds)
+  // speed: number // TODO: make this redundant, replace with just `tempo`
   unit: number // TODO: move to `metronome`
   // interval: number // in seconds (NOT NEEDED)
   repeat: boolean
@@ -55,7 +56,7 @@ export class Quartz {
     action,
     wait,
     ahead,
-    speed,
+    // speed,
     unit = 1,
     tempo = 120.0,
     silent = false,
@@ -64,7 +65,7 @@ export class Quartz {
     action: Callback,
     wait: number,
     ahead: number,
-    speed: number,
+    // speed: number,
     // interval: number,
     unit: number,
     tempo: number,
@@ -75,7 +76,7 @@ export class Quartz {
     this.action = action
     this.wait = wait
     this.ahead = ahead
-    this.speed = speed // TODO: confirm the need for this
+    // this.speed = speed // TODO: confirm the need for this
     this.unit = unit // TODO: confirm the need for this / where it came from...
     this.silent = silent
 
@@ -144,7 +145,6 @@ export class Quartz {
     const t0: number = event.playbackTime || 0
     const t1: number = t0 + event.args.duration
 
-    // TODO: consider passing in `cursor` to `action`
     this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
 
     // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
@@ -213,7 +213,7 @@ export class Quartz {
     return this
   }
 
-  // FIXME: actually set `this.speed` (maybe, `speed` is probably redundant
+  // FIXME: actually set `this.speed` (maybe, `speed` is probably redundant)
   // TODO: change to setter
   setSpeed (multiplier: number): this {
     const scale: number = multiplier || 1
