@@ -23,8 +23,8 @@ export interface State {
     end: Time
   }
   step: {
-    next: number //Time
-    cursor: number // FIXME: actually integrate this beyond just incrementing...
+    next: number // Time
+    cursor: number // FIXME: actually integrate this beyond just incrementing... (https://github.com/cwilso/metronome/blob/master/js/metronome.js#L40)
   }
 }
 
@@ -122,7 +122,6 @@ export class Quartz {
   // LINK: `metronome` in `web-audio-scheduler` (https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
-    // const spb = 60 / this.speed (??? why speed)
     const spb = 60 / this.state.tempo
 
     this.state.step.next = this.unit * spb
@@ -130,6 +129,7 @@ export class Quartz {
 
     // TODO: potentially call `schedule`. should be the same as tick, most likely. (@see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L158)
     // TODO: call `this.tick`!
+    this.tick(event)
   }
 
   // TODO: figure out wtf this is about lol
@@ -139,10 +139,12 @@ export class Quartz {
   // FIXME: import WAS.Event interface, somehow. or use `any`
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
-  tick (event: any, after: Callback = () => {}): void {
+  // tick (event: any, after: Callback = () => {}): void {
+  tick (event: any): void {
     const t0: number = event.playbackTime || 0
     const t1: number = t0 + event.args.duration
 
+    // TODO: consider passing in `cursor` to `action`
     this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
 
     // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
