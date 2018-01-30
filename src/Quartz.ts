@@ -84,7 +84,7 @@ export class Quartz {
 
     this.scheduler = new WebAudioScheduler({
       context: this.context,
-      interval: this.rate, // NOTE: this is the same as `rate` AKA `cycleLength`. need to conflate.
+      interval: this.rate,
       timerAPI: timer,
       aheadTime: ahead
     })
@@ -103,18 +103,22 @@ export class Quartz {
         cursor: 0
       }
     }
+
+    this.init()
   }
 
   // play silent buffer to unlock the audio
   // kick off the web worker timer
   init (): this {
+    // TODO: we should probably only do this if `this.silent` is `true`
     const buffer = this.context.createBuffer(1, 1, 22050 /* minimum sample rate */)
     const node   = this.context.createBufferSource()
 
     node.buffer = buffer
     node.start(0)
 
-    this.worker = WorkerTimer()
+    this.worker = WorkerTimer(this)
+    // this.worker.onmessage = event => this.schedule() // FIXME: this is already in `Worker.ts` but with a diff impl...
     this.worker.postMessage({ wait: this.wait })
 
     return this
@@ -129,7 +133,6 @@ export class Quartz {
     this.state.step.cursor++
 
     // TODO: potentially call `schedule`. should be the same as tick, most likely. (@see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L158)
-    // TODO: call `this.tick`!
     this.tick(event)
   }
 
@@ -140,16 +143,11 @@ export class Quartz {
   // FIXME: import WAS.Event interface, somehow. or use `any`
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
-  // tick (event: any, after: Callback = () => {}): void {
   tick (event: any): void {
     const t0: number = event.playbackTime || 0
     const t1: number = t0 + event.args.duration
 
     this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
-
-    // TODO: consider creating a wrapper for the callback that makes something like the audio context object easily accessible
-    // TODO: determine a clean way for the user to provide an `after each tick` callback (either accept in `play` or on `this`. probably `this`.)
-    // this.scheduler.nextTick(t1, after)
   }
 
   // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
