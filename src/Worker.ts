@@ -17,26 +17,19 @@ const worker = (quartz: Quartz) => { console.log('CREATED WORKER BRO'); return n
   self.onmessage = event => {
     const { data } = event
 
-    console.log('~~~ received arbitrary message')
-
-    self.postMessage('sanity test')
+    console.log('~~~ received arbitrary message', event)
 
     if (data === 'start') {
-      console.log('------- worker start')
       interval = timer(self)
     } else if (data === 'stop') {
       clearInterval(interval as number)
       // api.clearInterval(interval as number)
-
-      console.log('-------- worker end')
 
       interval = null
     // } else if (data === 'tick') {
     //   quartz.schedule()
     } else if (data.wait) {
       wait = data.wait
-
-      console.log('--------- worker wait')
 
       if (interval) {
         clearInterval(interval as number)

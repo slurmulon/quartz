@@ -5,6 +5,7 @@
 
 // "In general, to be resilient to slower machines and operating systems, it’s best to have a large overall lookahead and a reasonably short interval"
 
+import now = require('performance-now')
 import WebAudioScheduler = require('web-audio-scheduler')
 import InlineWorker = require('inline-worker')
 import WorkerTimer from './Worker'
@@ -56,7 +57,7 @@ export class Quartz {
   constructor ({
     action,
     wait,
-    ahead,
+    ahead = 0.1,
     // speed,
     unit = 1,
     tempo = 120.0,
@@ -90,6 +91,8 @@ export class Quartz {
       aheadTime: ahead
     })
 
+    // console.log('CURRENT TIME YO', this.context.currentTime)
+
     this.state = {
       running: false,
       duration: 60 / tempo,
@@ -100,7 +103,9 @@ export class Quartz {
         end: 0
       },
       step: {
-        next: 0,
+        // next: 0,
+        // next: this.context.currentTime,
+        next: now(),
         cursor: 0
       }
     }
@@ -110,48 +115,47 @@ export class Quartz {
 
   // play silent buffer to unlock the audio
   // kick off the web worker timer
+  // FIXME: audioContext.currentTime is always 0 (as if the audio isn't being unlocked)
+  //  - START HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //  - probably has to do with length of 1 being passed to createBuffer (last for a very short amount of time)
+  //  - but why doesn't `bopper` even need to create an audio context buffer...?
+  //  - @see https://github.com/chrisguttandin/audio-context-timers/blob/master/src/module.ts
   init (): this {
     // TODO: we should probably only do this if `this.silent` is `true`
     const buffer = this.context.createBuffer(1, 1, 22050 /* minimum sample rate */)
+    // const buffer = this.context.createBuffer(1, 100000, 22050) // EXPERIMENT (100,000). no difference.
     const node   = this.context.createBufferSource()
 
     node.buffer = buffer
     node.start(0)
 
+    // NOTE: might be able to replace all of this with the `worker-timer` module
     this.worker = WorkerTimer(this)
     this.worker.postMessage({ wait: this.wait })
-    this.worker.onmessage = event => {
-      if ((event as any).data === 'tick') this.schedule()
-    }
-    // this.worker.onmessage = (event: Object) => console.log('received worker response', event)
-
-    // const self = this
-    // this.worker = new InlineWorker(function (self) {
-    //   console.log('IT LIVESSSS')
-    //   self.onmessage = event => {
-    //     console.log('RECEIVED MESSAGE :D', event)
-    //   }
-    // }, self)
-    // this.worker.postMessage('poop')
-
-    // console.log('!!! initialized')
+    // this.worker.onmessage = event => ((event as any).data === 'tick' ? this.schedule() : null)
+    this.worker.onmessage = event => ((event as any).data === 'tick' ? this.schedule(event) : null)
 
     return this
   }
 
+  // FIXME: this is only getting called once
+  //  - this might need to call `this.schedule`
   // LINK: `metronome` in `web-audio-scheduler` (https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
+  // LINK: `nextNote` in `metronome` (https://github.com/cwilso/metronome/blob/master/js/metronome.js#L34)
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
-    console.log('THIS STATE', this)
     const spb = 60 / this.state.tempo
 
-    this.state.step.next = this.unit * spb
+    this.state.step.next += this.unit * spb
     this.state.step.cursor++
+
+    console.log('[quartz:loop] loopin', event, this.state.step)
 
     // TODO: potentially call `schedule`. should be the same as tick, most likely. (@see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L158)
     this.tick(event)
   }
 
+  // FIXME: this (and thus `this.action`) is only getting called once!
   // TODO: figure out wtf this is about lol
   //  - https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md
   //  - `function ticktac(e) {`
@@ -160,7 +164,7 @@ export class Quartz {
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
   tick (event: any): void {
-    console.log('!!! tick event', event)
+    console.log('[quartz:tick] tick event', event)
     const t0: number = event.playbackTime || 0
     const t1: number = t0 + (event.args ? event.args.duration : 0)
 
@@ -174,22 +178,36 @@ export class Quartz {
   // TODO: determine when this should get called...
   // FIXME: may need to call `this.scheduler.nextTick` here... (@see usage in https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   // FIXME: I think this can just be completely replaced with `scheduler.nextTick`!
-  schedule (): void {
-    const { next } = this.state.step
+  // schedule (): void {
+  schedule (event: Event): void {
+    // const { next } = this.state.step
     const { duration } = this.state
     const current = this.state.last.end as number
-    const frame   = this.context.currentTime + this.ahead
+    // const frame = this.context.currentTime + this.ahead
 
-    while (next < frame) {
+    // console.log('[quartz:schedule] waiting... [next, current, frame, ahead]', next, current, frame, this.ahead)
+
+    // FIXME: next doesn't change because it's defined in this lexical scope, once
+    // while (next < frame) {
+    // while (this.next < this.context.currentTime + this.ahead) {
+    while (this.next < now() + this.ahead) {
+      console.log('[quartz:schedule] adding to schedule', current)
       // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
-      this.scheduler.insert(current, this.schedule, { duration })
+      this.scheduler.insert(current, this.schedule.bind(this), { duration })
+      // TODO: call `this.loop`?
+      this.loop(event)
     }
   }
 
-  play () {
+  get next () {
+    console.log('[quartz:next] next???', this.state.step.next, this.context.currentTime)
+    return this.state.step.next
+  }
+
+  start () {
     this.state.running = true
-    // this.schedule()
-    this.scheduler.start(this.loop.bind(this))
+    // this.scheduler.start(this.loop.bind(this))
+    this.scheduler.start(this.schedule.bind(this))
     this.worker.postMessage('start')
   }
 
@@ -205,12 +223,14 @@ export class Quartz {
     return this
   }
 
+  // TODO: can probably axe this
   getPositionAt (time: number): number {
     const delta = (this.state.last.end as number) - time
 
     return this.state.last.to - (delta / this.state.duration)
   }
 
+  // TODO: can probably axe this
   getTimeAt (position: number): number {
     const offset = this.position - position
 
@@ -248,5 +268,8 @@ export class Quartz {
   get rate (): number {
     return (1 / this.context.sampleRate) * 1024
   }
+
+  // TODO: calculate the amount of drift the timer is experiencing (if any, hopefully always 0!)
+  // get drift (): number
 
 }
