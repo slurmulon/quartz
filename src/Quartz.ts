@@ -5,9 +5,10 @@
 
 // "In general, to be resilient to slower machines and operating systems, it’s best to have a large overall lookahead and a reasonably short interval"
 
-import WebAudioScheduler from 'web-audio-scheduler'
-import InlineWorker from 'inline-worker'
+import WebAudioScheduler = require('web-audio-scheduler')
+import InlineWorker = require('inline-worker')
 import WorkerTimer from './Worker'
+import { AudioContext } from 'web-audio-api'
 import { Timer, Callback } from 'quartz'
 
 export type Time = Date | number
@@ -118,8 +119,22 @@ export class Quartz {
     node.start(0)
 
     this.worker = WorkerTimer(this)
-    // this.worker.onmessage = event => this.schedule() // FIXME: this is already in `Worker.ts` but with a diff impl...
     this.worker.postMessage({ wait: this.wait })
+    this.worker.onmessage = event => {
+      if ((event as any).data === 'tick') this.schedule()
+    }
+    // this.worker.onmessage = (event: Object) => console.log('received worker response', event)
+
+    // const self = this
+    // this.worker = new InlineWorker(function (self) {
+    //   console.log('IT LIVESSSS')
+    //   self.onmessage = event => {
+    //     console.log('RECEIVED MESSAGE :D', event)
+    //   }
+    // }, self)
+    // this.worker.postMessage('poop')
+
+    // console.log('!!! initialized')
 
     return this
   }
@@ -127,6 +142,7 @@ export class Quartz {
   // LINK: `metronome` in `web-audio-scheduler` (https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
+    console.log('THIS STATE', this)
     const spb = 60 / this.state.tempo
 
     this.state.step.next = this.unit * spb
@@ -144,31 +160,36 @@ export class Quartz {
   // TODO: consider `cycleLength` and `preCycle`
   //  - @see https://github.com/mmckegg/bopper/blob/master/index.js#L161
   tick (event: any): void {
+    console.log('!!! tick event', event)
     const t0: number = event.playbackTime || 0
-    const t1: number = t0 + event.args.duration
+    const t1: number = t0 + (event.args ? event.args.duration : 0)
 
+    // TODO: consider passing in `this.state` to `action`
     this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
   }
 
   // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
   // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L89 (calls `.insert` recursively)
   // LINK: https://github.com/mohayonao/web-audio-scheduler/blob/master/src/WebAudioScheduler.js#L118 (calls `.process`
+  // TODO: determine when this should get called...
   // FIXME: may need to call `this.scheduler.nextTick` here... (@see usage in https://github.com/mohayonao/web-audio-scheduler/blob/master/README.md)
   // FIXME: I think this can just be completely replaced with `scheduler.nextTick`!
   schedule (): void {
     const { next } = this.state.step
-    const current  = this.state.last.end as number
-    const frame    = this.context.currentTime + this.ahead
+    const { duration } = this.state
+    const current = this.state.last.end as number
+    const frame   = this.context.currentTime + this.ahead
 
     while (next < frame) {
       // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
-      this.scheduler.insert(current, this.schedule)
+      this.scheduler.insert(current, this.schedule, { duration })
     }
   }
 
   play () {
     this.state.running = true
-    this.scheduler.start(this.loop)
+    // this.schedule()
+    this.scheduler.start(this.loop.bind(this))
     this.worker.postMessage('start')
   }
 
@@ -224,7 +245,7 @@ export class Quartz {
     return this.getPositionAt(this.context.currentTime)
   }
 
-  get rate (): number { // AKA `cycleLength`
+  get rate (): number {
     return (1 / this.context.sampleRate) * 1024
   }
 
