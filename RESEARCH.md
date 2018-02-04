@@ -41,6 +41,7 @@
 - https://github.com/chrisguttandin/audio-context-timers/blob/master/src/module.ts
 - https://webtiming.github.io/timingobject/
 - https://webtiming.github.io/
+- https://webtiming.github.io/timingsrc/
 
 ## Features
 

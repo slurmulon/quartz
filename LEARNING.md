@@ -59,3 +59,7 @@
 ## Karma
 
 - https://zirho.github.io/2016/06/06/karma-es6/
+
+## Seeds
+
+- https://github.com/Idorobots/typescript-webpack-karma-seed
