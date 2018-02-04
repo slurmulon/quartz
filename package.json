@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "types": "src/types.d.ts",
   "scripts": {
-    "test": "mocha test"
+    "test": "browserify test/*.spec.js | tape-run"
   },
   "repository": {
     "type": "git",
@@ -32,10 +32,17 @@
     "inline-worker": "^1.1.0",
     "performance-now": "^2.1.0",
     "raf": "^3.4.0",
+    "timing-object": "^1.0.6",
+    "web-audio-api": "^0.2.2",
     "web-audio-scheduler": "^1.4.0",
     "worker-timers": "^4.0.20"
   },
   "devDependencies": {
-    "@types/node": "^8.5.2"
+    "@types/node": "^8.5.2",
+    "browserify": "^15.2.0",
+    "browserify-shim": "^3.8.14",
+    "tape": "^4.8.0",
+    "tape-run": "^3.0.2",
+    "webpack": "^3.10.0"
   }
 }
