@@ -1,5 +1,5 @@
 import { SetInterval, ClearInterval, Timer } from 'quartz'
-import now from 'performance-now'
+import now = require('performance-now')
 
 export const setInterval: SetInterval = (func, wait) => {
   let action: (...args: any[]) => void

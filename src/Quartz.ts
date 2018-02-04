@@ -5,7 +5,7 @@
 
 // "In general, to be resilient to slower machines and operating systems, it’s best to have a large overall lookahead and a reasonably short interval"
 
-import now = require('performance-now')
+import now = require('performance-now') // TODO: make this optional (make AudioContext the default)
 import WebAudioScheduler = require('web-audio-scheduler')
 import InlineWorker = require('inline-worker')
 import WorkerTimer from './Worker'
@@ -31,6 +31,7 @@ export interface State {
   }
 }
 
+// FIXME: fallback to `performance.now` if this is being run in node (`web-audio-api` shim is not working as expected)
 // TODO: get `scheduler` (the main `while` loop) to run in a `WebWorker`
 // TODO: play a dummy buffer before starting the scheduling
 //  - https://github.com/cwilso/metronome/pull/15
@@ -91,8 +92,6 @@ export class Quartz {
       aheadTime: ahead
     })
 
-    // console.log('CURRENT TIME YO', this.context.currentTime)
-
     this.state = {
       running: false,
       duration: 60 / tempo,
@@ -123,7 +122,6 @@ export class Quartz {
   init (): this {
     // TODO: we should probably only do this if `this.silent` is `true`
     const buffer = this.context.createBuffer(1, 1, 22050 /* minimum sample rate */)
-    // const buffer = this.context.createBuffer(1, 100000, 22050) // EXPERIMENT (100,000). no difference.
     const node   = this.context.createBufferSource()
 
     node.buffer = buffer
@@ -144,12 +142,12 @@ export class Quartz {
   // LINK: `nextNote` in `metronome` (https://github.com/cwilso/metronome/blob/master/js/metronome.js#L34)
   // TODO: call this. check `this.repeat` to determine if it should loop (i.e. call `this.tick`)
   loop (event: Event) {
+    console.log('[quartz:loop] loopin', event, this.state.step)
+
     const spb = 60 / this.state.tempo
 
     this.state.step.next += this.unit * spb
     this.state.step.cursor++
-
-    console.log('[quartz:loop] loopin', event, this.state.step)
 
     // TODO: potentially call `schedule`. should be the same as tick, most likely. (@see https://github.com/cwilso/metronome/blob/master/js/metronome.js#L158)
     this.tick(event)
@@ -170,6 +168,8 @@ export class Quartz {
 
     // TODO: consider passing in `this.state` to `action`
     this.action(event, (next: Callback) => this.scheduler.nextTick(t1, next))
+
+    debugger
   }
 
   // LINK: https://github.com/cwilso/metronome/blob/master/js/metronome.js#L69
@@ -191,7 +191,7 @@ export class Quartz {
     // while (next < frame) {
     // while (this.next < this.context.currentTime + this.ahead) {
     while (this.next < now() + this.ahead) {
-      console.log('[quartz:schedule] adding to schedule', current)
+      console.log('[quartz:schedule] adding to schedule [next, current, duration]', this.next, current, duration)
       // TODO: possibly convert currentNote (this.state.step.cursor) into `currentBeat` or `beatAt`, something like that
       this.scheduler.insert(current, this.schedule.bind(this), { duration })
       // TODO: call `this.loop`?
@@ -200,7 +200,6 @@ export class Quartz {
   }
 
   get next () {
-    console.log('[quartz:next] next???', this.state.step.next, this.context.currentTime)
     return this.state.step.next
   }
 
