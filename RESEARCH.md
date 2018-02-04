@@ -39,6 +39,8 @@
 - https://www.npmjs.com/package/raf-schd
 - https://github.com/chrisguttandin/audio-context-timers
 - https://github.com/chrisguttandin/audio-context-timers/blob/master/src/module.ts
+- https://webtiming.github.io/timingobject/
+- https://webtiming.github.io/
 
 ## Features
 
