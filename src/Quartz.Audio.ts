@@ -41,7 +41,7 @@ export interface State {
 //  - consider renaming `Quartz` to `Metronome`
 // TODO: consider differentiating between Sequential and Lazy timers (lazy ~ `setInterval`, sequential ~ `WebAudioAPI`)
 
-export class Quartz {
+export class AudioQuartz {
   action: Callback
   wait: number // how frequently to call scheduling function (in milliseconds). maybe rename to `freq` or `frequency`
   ahead: number // how far ahead to schedule audio (in seconds)
@@ -128,7 +128,7 @@ export class Quartz {
     node.start(0)
 
     // NOTE: might be able to replace all of this with the `worker-timer` module
-    this.worker = WorkerTimer(this)
+    this.worker = WorkerTimer() //(this)
     this.worker.postMessage({ wait: this.wait })
     // this.worker.onmessage = event => ((event as any).data === 'tick' ? this.schedule() : null)
     this.worker.onmessage = event => ((event as any).data === 'tick' ? this.schedule(event) : null)

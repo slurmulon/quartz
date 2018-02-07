@@ -11,7 +11,8 @@ const timer = (worker: InlineWorker): IntervalId => setInterval(() => worker.pos
 // TODO: move all of this into `Quartz.ts`. no point in having it separate.
 // TODO: inherit custom interval from parent quartz object or just use `accurate-timer`
 // const worker = (api: Timer = Clock) => new InlineWorker(self => {
-const worker = (quartz: Quartz) => { console.log('CREATED WORKER BRO'); return new InlineWorker(self => {
+// const worker = (quartz: Quartz) => { console.log('CREATED WORKER BRO'); return new InlineWorker(self => {
+const worker = () => new InlineWorker(self => {
   console.log('~~~ inline worker', self)
 
   self.onmessage = event => {
@@ -39,7 +40,7 @@ const worker = (quartz: Quartz) => { console.log('CREATED WORKER BRO'); return n
       }
     }
   }
-})}
+})
 // }, quartz)
 
 export default worker
