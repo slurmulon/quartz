@@ -24,8 +24,8 @@ export class Quartz {
   state: State
 
   constructor ({
-    action,
-    wait,
+    action = () => {},
+    wait = 0,
     acceleration = 1,
     position = 0,
     velocity = 1,
