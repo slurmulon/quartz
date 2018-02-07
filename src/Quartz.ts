@@ -2,7 +2,7 @@ import { TimingObject, ITimingObject } from 'timing-object'
 import { Timer, IntervalId } from 'quartz'
 import now = require('performance-now')
 
-export interface Meta {
+export interface State {
   last: number
   delta: number
   drift: number
@@ -21,7 +21,7 @@ export class Quartz {
   velocity: number
   api: Timer
   interval: IntervalId | null
-  meta: Meta
+  state: State
 
   constructor ({
     action,
@@ -44,8 +44,8 @@ export class Quartz {
     this.position = position
     this.velocity = velocity
     this.api = api
-    this.timer = new TimingObject({ acceleration, position, velocity }) // TODO: consider last 2 args
-    this.meta = {
+    this.timer = new TimingObject({ acceleration, position, velocity }) // TODO: consider last 2 args (start + end positions)
+    this.state = {
       last: now(),
       delta: 0,
       drift: 0,
@@ -62,8 +62,8 @@ export class Quartz {
     return this
   }
 
-  // FIXME: remove need for `as any`
   stop () {
+    // FIXME: remove need for `as any`
     const clear = this.api.clearInterval as any
 
     clear(this.interval)
@@ -74,12 +74,16 @@ export class Quartz {
   step () {
     const { time, delta, drift } = this
 
-    this.meta = { ...this.meta, ...{ last: time, delta, drift } }
-    this.meta.total.time  += delta
-    this.meta.total.drift += drift
+    this.state = { ...this.state, ...{ last: time, delta, drift } }
+    this.state.total.time  += delta
+    this.state.total.drift += drift
 
     this.action(this)
   }
+
+  // update (vector: ITimingStateVectorUpdate) {
+  //   // TODO
+  // }
 
   get query () {
     return this.timer.query()
@@ -90,7 +94,7 @@ export class Quartz {
   }
 
   get delta () {
-    return Math.abs(this.meta.last - this.query.timestamp)
+    return Math.abs(this.state.last - this.query.timestamp)
   }
 
   get drift () {
