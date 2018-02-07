@@ -41,6 +41,7 @@
 - https://stackoverflow.com/questions/44416902/how-to-fix-types-node-index-d-ts-is-not-a-module
 - https://stackoverflow.com/questions/36013174/importing-node-and-express-with-typings-in-typescript
 - Importing a "non-module entitty": https://stackoverflow.com/questions/39415661/what-does-resolves-to-a-non-module-entity-and-cannot-be-imported-using-this
+- https://stackoverflow.com/questions/28637767/typescript-cannot-find-name-even-though-it-is-referenced
 - `currentTime` is always 0: https://bugs.chromium.org/p/chromium/issues/detail?id=159359
 - Missing `default`?: https://github.com/Microsoft/TypeScript/issues/5565
 - Missing `global`?:
