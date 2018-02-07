@@ -64,21 +64,37 @@ export class Quartz {
 
   // FIXME: remove need for `as any`
   stop () {
-    (this.api.clearInterval as any)(this.interval)
+    const clear = this.api.clearInterval as any
+
+    clear(this.interval)
 
     return this
   }
 
   step () {
-    const time  = this.timer.query().timestamp
-    const delta = Math.abs(this.meta.last - time)
-    const drift = delta - this.wait
+    const { time, delta, drift } = this
 
     this.meta = { ...this.meta, ...{ last: time, delta, drift } }
     this.meta.total.time  += delta
     this.meta.total.drift += drift
 
     this.action(this)
+  }
+
+  get query () {
+    return this.timer.query()
+  }
+
+  get time () {
+    return this.query.timestamp
+  }
+
+  get delta () {
+    return Math.abs(this.meta.last - this.query.timestamp)
+  }
+
+  get drift () {
+    return this.delta - this.wait
   }
 
 }
